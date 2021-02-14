@@ -1,0 +1,14 @@
+---
+title: "STA 141 A project 2"
+author: "Jason Xie"
+date: "2021/2/13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+Nothing yet
+```{r}
+
+```
