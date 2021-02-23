@@ -14,7 +14,8 @@ library(ggplot2)
 library(tidyverse)
 library(readr)
 WHO <-  read.csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
-population <- read_csv("Git hub for 141A/TRUE variable for prediction of different countries/population_by_country_2020.csv")
+
+population <- read.csv('https://raw.githubusercontent.com/YixinXie10086/Project-141A/master/Main%20project/population_by_country_2020%20(1).csv')
 
 head(WHO)
 head(population)
@@ -37,7 +38,6 @@ match_country_name=function(set1,name1,name2){
     set1$Country[set1$Country==name1[val]]=as.character(name2[val])
     
   }
-  
   
   return(set1)
 }
