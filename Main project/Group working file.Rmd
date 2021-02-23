@@ -8,8 +8,53 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-Nothing yet
+
 ```{r}
-covid <- read.csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
-covid
+library(ggplot2)
+library(tidyverse)
+library(readr)
+WHO <-  read.csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
+population <- read_csv("Git hub for 141A/TRUE variable for prediction of different countries/population_by_country_2020.csv")
+
+head(WHO)
+head(population)
 ```
+
+```{r}
+names(population)[1] <- "Country"
+names(WHO)[1] <- "date"
+total_case=WHO %>% filter((date=='2020-12-31')) %>% filter(!is.na(Cumulative_cases)) %>% select(Country,Cumulative_cases)
+head(total_case)
+head(population)
+
+data_attempt1=inner_join(total_case,population,by=c('Country'))
+dim(data_attempt1)
+
+
+match_country_name=function(set1,name1,name2){
+  for (val in c(1:length(set1))){
+    set1$Country=as.character(set1$Country)
+    set1$Country[set1$Country==name1[val]]=as.character(name2[val])
+    
+  }
+  
+  
+  return(set1)
+}
+
+name1=c('United States','Russia','Vietnam','DR Congo','Iran','United Kingdom',"Tanzania","South Korea","Venezuela","Côte d’Ivoire","North Korea","Syria","Bolivia","Czech Republic (Czechia)","Laos","Moldova","Brunei","Sao Tome & Principe",'Micronesia',"St. Vincent & Grenadines","Northern Mariana Islands","Saint Kitts & Nevis","Turks and Caicos","Wallis & Futuna","Saint Pierre & Miquelon",'Falkland Islands (Malvinas)')
+
+name2=c("United States of America","Russian Federation","Viet Nam","Congo","Iran (Islamic Republic of)","The United Kingdom","United Republic of Tanzania","Republic of Korea","Venezuela (Bolivarian Republic of)","Côte d’Ivoire","Democratic People's Republic of Korea","Syrian Arab Republic","Bolivia (Plurinational State of)","Czechia","Lao People's Democratic Republic","Republic of Moldova","Brunei Darussalam","Sao Tome and Principe","Micronesia (Federated States of)","Saint Vincent and the Grenadines","Northern Mariana Islands (Commonwealth of the)","Saint Kitts and Nevis","Turks and Caicos Islands","Wallis and Futuna","Saint Pierre and Miquelon","Falkland Islands (Malvinas)")
+
+population=match_country_name(population,name1,name2)
+
+
+
+
+data_attemp2=inner_join(total_case,population,by=c('Country'))
+data_attemp2
+dim(data_attemp2)
+
+
+```
+
