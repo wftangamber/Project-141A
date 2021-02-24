@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Data_Analysis
 ```{r}
 library(ggplot2)
 library(tidyverse)
@@ -22,39 +23,106 @@ head(population)
 ```
 
 ```{r}
+#Merge WHO data with Population data
 names(population)[1] <- "Country"
 names(WHO)[1] <- "date"
-total_case=WHO %>% filter((date=='2020-12-31')) %>% filter(!is.na(Cumulative_cases)) %>% select(Country,Cumulative_cases)
+total_case=WHO %>% filter((date=='2021-02-18')) %>% mutate(death_percent=100*(Cumulative_deaths/Cumulative_cases))%>% filter(!is.na(death_percent)) %>% select(Country,death_percent,WHO_region)
+
 head(total_case)
 head(population)
 
 data_attempt1=inner_join(total_case,population,by=c('Country'))
 dim(data_attempt1)
 
-
+#matching country_name in 2 different datasets
 match_country_name=function(set1,name1,name2){
-  for (val in c(1:length(set1))){
+  for (val in c(1:length(name1))){
     set1$Country=as.character(set1$Country)
     set1$Country[set1$Country==name1[val]]=as.character(name2[val])
-    
+   
+    set1$Country=as.factor(set1$Country)
   }
   
   return(set1)
 }
 
-name1=c('United States','Russia','Vietnam','DR Congo','Iran','United Kingdom',"Tanzania","South Korea","Venezuela","Côte d’Ivoire","North Korea","Syria","Bolivia","Czech Republic (Czechia)","Laos","Moldova","Brunei","Sao Tome & Principe",'Micronesia',"St. Vincent & Grenadines","Northern Mariana Islands","Saint Kitts & Nevis","Turks and Caicos","Wallis & Futuna","Saint Pierre & Miquelon",'Falkland Islands (Malvinas)')
+name1=c('United States','Russia','Vietnam','Iran','United Kingdom',"Tanzania","South Korea","Venezuela","Côte d’Ivoire","North Korea","Syria","Bolivia","Czech Republic (Czechia)","Laos","Moldova","Brunei","Sao Tome & Principe",'Micronesia',"St. Vincent & Grenadines","Northern Mariana Islands","Saint Kitts & Nevis","Turks and Caicos","Wallis & Futuna","Saint Pierre & Miquelon",'Falkland Islands (Malvinas)')
 
-name2=c("United States of America","Russian Federation","Viet Nam","Congo","Iran (Islamic Republic of)","The United Kingdom","United Republic of Tanzania","Republic of Korea","Venezuela (Bolivarian Republic of)","Côte d’Ivoire","Democratic People's Republic of Korea","Syrian Arab Republic","Bolivia (Plurinational State of)","Czechia","Lao People's Democratic Republic","Republic of Moldova","Brunei Darussalam","Sao Tome and Principe","Micronesia (Federated States of)","Saint Vincent and the Grenadines","Northern Mariana Islands (Commonwealth of the)","Saint Kitts and Nevis","Turks and Caicos Islands","Wallis and Futuna","Saint Pierre and Miquelon","Falkland Islands (Malvinas)")
+name2=c("United States of America","Russian Federation","Viet Nam","Iran (Islamic Republic of)","The United Kingdom","United Republic of Tanzania","Republic of Korea","Venezuela (Bolivarian Republic of)","Côte d’Ivoire","Democratic People's Republic of Korea","Syrian Arab Republic","Bolivia (Plurinational State of)","Czechia","Lao People's Democratic Republic","Republic of Moldova","Brunei Darussalam","Sao Tome and Principe","Micronesia (Federated States of)","Saint Vincent and the Grenadines","Northern Mariana Islands (Commonwealth of the)","Saint Kitts and Nevis","Turks and Caicos Islands","Wallis and Futuna","Saint Pierre and Miquelon","Falkland Islands (Malvinas)")
 
 population=match_country_name(population,name1,name2)
 
 
 
 
-data_attemp2=inner_join(total_case,population,by=c('Country'))
-data_attemp2
-dim(data_attemp2)
+
+
+data_attempt2=inner_join(total_case,population,by=c('Country'))
+data_attempt2
+dim(data_attempt2)
+```
+```{r}
+GDP_per_capita_19= read_csv('https://raw.githubusercontent.com/YixinXie10086/Project-141A/master/Main%20project/GDP%20per%20capita%20(2017%20PPP%20%24).csv',skip=5)%>% select(Country,`2019`)
+
+colnames(GDP_per_capita_19)[2]="GDP per Capita $PPP 2019"
+
+GDP_per_capita_19$Country=as.character(GDP_per_capita_19$Country)
+
+
+list1=c("Tanzania (United Republic of)",'United Kingdom','United States',"Korea (Republic of)","Moldova (Republic of)")
+list2=c("United Republic of Tanzania","The United Kingdom","United States of America","Republic of Korea","Republic of Moldova")
+
+GDP_per_captia_19=match_country_name(GDP_per_capita_19,list1,list2)
+data3=inner_join(data_attempt2,GDP_per_captia_19)%>% filter(`GDP per Capita $PPP 2019`!="..") 
+data3
+
+dim(data3)
+
+```
+
+
+
+
+
+
+
+
+```{r}
+
+health_expenditure <- read.csv("https://raw.githubusercontent.com/YixinXie10086/Project-141A/master/Main%20project/Current%20health%20expenditure%20(%25%20of%20GDP).csv",skip = 6, header = T) %>%
+  filter(X2017!="..") %>% select(Country,X2017) 
+
+colnames(health_expenditure)[2]="health expenditure in percent of GDP"
+
+for (i in c(1:length(health_expenditure$Country))){
+  health_expenditure$Country[i]=substr(health_expenditure$Country[i],2,nchar(health_expenditure$Country[i]))
+}
+
+
+
+health_expenditure=as.tibble(health_expenditure)
+
+
+
+list1=c("Congo (Democratic Republic of the)","Côte d'Ivoire","Eswatini (Kingdom of)","Korea (Republic of)","Lao People's Democratic Republic","Moldova (Republic of)","United Kingdom","United States")
+list2=c("Democratic Republic of the Congo","Côte d’Ivoire","Eswatini","Republic of Korea","Lao People's Democratic Republic","Republic of Moldova","The United Kingdom","United States of America")
+
+
+health_expenditure2=match_country_name(health_expenditure,list1,list2)
+health_expenditure2$Country=as.character(health_expenditure2$Country)
+#health_expenditure2$Country=as.character(health_expenditure$Country)
+
+data4=inner_join(data3,health_expenditure2,by="Country")
+health_expenditure2$Country
+
+data4
+dim(data4)
 
 
 ```
 
+
+datasource:
+http://hdr.undp.org/en/indicators/194506#
+https://www.kaggle.com/tanuprabhu/population-by-country-2020
+http://hdr.undp.org/en/indicators/194906
