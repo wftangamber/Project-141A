@@ -118,6 +118,23 @@ health_expenditure2$Country
 data4
 dim(data4)
 
+d_rate_table<- data4 %>% filter_at(vars(death_percent,WHO_region,`Population..2020.`,Yearly.Change,Net.Change,
+                                        `Density..P.KmÂ².`,`Land.Area..KmÂ².`,
+                                        Migrants..net.,Fert..Rate,Med..Age,Urban.Pop..,World.Share,
+                                        `GDP per Capita $PPP 2019`,`health expenditure in percent of GDP`),
+                                   any_vars(!is.na(.)))%>% select_all()
+
+d_rate_table
+dim(d_rate_table)
+#d_rate_table is the dataframe to use 
+```
+
+```{r}
+
+
+
+
+
 
 ```
 
