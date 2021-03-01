@@ -163,11 +163,11 @@ library(glmnet)
 set.seed(1)
 d_rate_table=as.tibble(d_rate_table)
 #partition data into 50 percent. 
-index_50percent= createDataPartition(d_rate_table$Cumulative_cases,p=0.5,list=FALSE,times=1)
+index_80percent= createDataPartition(d_rate_table$Cumulative_cases,p=0.8,list=FALSE,times=1)
 
 #test and training.
-train=d_rate_table[index_50percent,]
-test=d_rate_table[-index_50percent,]
+train=d_rate_table[index_80percent,]
+test=d_rate_table[-index_80percent,]
 
 
 #train=d_rate_table %>% sample_frac(0.8)
@@ -178,7 +178,7 @@ y_train=train %>% select(Cumulative_cases) %>% unlist() %>% as.numeric()
 y_test=test %>% select(Cumulative_cases) %>% unlist() %>% as.numeric()
 
 
-lasso_mod=glmnet(x_train,y_train,alpha=1)
+lasso_mod=glmnet(x_train,y_train,alpha=1 )
 plot(lasso_mod)
 cv.train=cv.glmnet(x_train,y_train,alpha=1,type.measure = "mse")
 plot(cv.train)
@@ -189,9 +189,35 @@ lasso_pred = predict(lasso_mod, s = best_lam, newx = x_test)
 mean((lasso_pred - y_test)^2)
 lasso_coef = predict(lasso_mod, type = "coefficients", s = best_lam)
 lasso_coef
+mean((lasso_pred - y_test)^2)
+
+
+
+
+
+```
+
+```{r}
+
+
+
+ridge_mod=glmnet(x_train,y_train,alpha=0)
+plot(lasso_mod)
+cv.train=cv.glmnet(x_train,y_train,alpha=0,type.measure = "mse")
+plot(cv.train)
+best_lam=cv.train$lambda.min
+best_lam 
+
+ridge_pred = predict(ridge_mod, s = best_lam, newx = x_test)
+mean((ridge_pred - y_test)^2)
+lasso_coef = predict(lasso_mod, type = "coefficients", s = best_lam)
+lasso_coef
+
 ```
 
 
+
+```
 datasource:
 http://hdr.undp.org/en/indicators/194506#
 https://www.kaggle.com/tanuprabhu/population-by-country-2020
