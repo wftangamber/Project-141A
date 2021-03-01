@@ -16,7 +16,7 @@ library(tidyverse)
 library(readr)
 WHO <-  read.csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
 
-population <- read.csv('https://raw.githubusercontent.com/YixinXie10086/Project-141A/master/Main%20project/population_by_country_2020%20(1).csv')
+population <- read.csv('https://raw.githubusercontent.com/YixinXie10086/Project-141A/master/Main%20project/population_by_country_2020%20(1).csv') %>% filter_all(all_vars(!is.na(.)&(.!="N.A.")))
 
 head(WHO)
 head(population)
@@ -26,7 +26,8 @@ head(population)
 #Merge WHO data with Population data
 names(population)[1] <- "Country"
 names(WHO)[1] <- "date"
-total_case=WHO %>% filter((date=='2021-02-18')) %>% mutate(death_percent=100*(Cumulative_deaths/Cumulative_cases))%>% filter(!is.na(death_percent)) %>% select(Country,death_percent,WHO_region)
+total_case=WHO %>% filter((date=='2021-02-18')) %>% mutate(death_percent=100*(Cumulative_deaths/Cumulative_cases))%>%
+  filter(!is.na(death_percent)) %>% select(Country,Cumulative_cases,WHO_region)
 
 head(total_case)
 head(population)
@@ -118,24 +119,76 @@ health_expenditure2$Country
 data4
 dim(data4)
 
-d_rate_table<- data4 %>% filter_at(vars(death_percent,WHO_region,`Population..2020.`,Yearly.Change,Net.Change,
-                                        `Density..P.KmÂ².`,`Land.Area..KmÂ².`,
-                                        Migrants..net.,Fert..Rate,Med..Age,Urban.Pop..,World.Share,
-                                        `GDP per Capita $PPP 2019`,`health expenditure in percent of GDP`),
-                                   any_vars(!is.na(.)))%>% select_all()
+d_rate_table<- data4 %>% select(-Country) %>% mutate_if(is.character,as.factor)  
+
+d_rate_table$`Yearly.Change`=as.character(d_rate_table$`Yearly.Change`)
+d_rate_table$`Urban.Pop..`=as.character(d_rate_table$`Urban.Pop..`)
+d_rate_table$`World.Share`=as.character(d_rate_table$`World.Share`)
+
+#remove the % sign and change features into numberic
+for (i in c(1:length(d_rate_table$`Yearly.Change`))){
+  d_rate_table$`Yearly.Change`[i]=substr(d_rate_table$`Yearly.Change`[i],1,nchar(d_rate_table$`Yearly.Change`[i])-1)
+}
+
+
+for (i in c(1:length(d_rate_table$`Urban.Pop..`))){
+  d_rate_table$`Urban.Pop..`[i]=substr(d_rate_table$`Urban.Pop..`[i],1,nchar(d_rate_table$`Urban.Pop..`[i])-1)
+}
+
+for (i in c(1:length(d_rate_table$`World.Share`))){
+  d_rate_table$`World.Share`[i]=substr(d_rate_table$`World.Share`[i],1,nchar(d_rate_table$`World.Share`[i])-1)
+}
+
+
+d_rate_table=d_rate_table %>%
+  transmute(Cumulative_cases=Cumulative_cases,WHO_region=WHO_region,Population2020=`Population..2020.`,Pop_yearly_change=as.numeric(`Yearly.Change`),Net.Change=Net.Change,population_density=`Density..P.KmÂ².`,land_area=`Land.Area..KmÂ².`,Migrant_net_change=`Migrants..net.`,Fert_rate=as.numeric(`Fert..Rate`), median_age=as.numeric(`Med..Age`),urban_population_percent=as.numeric(`Urban.Pop..`),World_Share=as.numeric(`World.Share`),GDP_per_capita=as.numeric(`GDP per Capita $PPP 2019`),health_expenditure_of_GDP=as.numeric(`health expenditure in percent of GDP`))
+
+
+
+  
+                                     
 
 d_rate_table
 dim(d_rate_table)
 #d_rate_table is the dataframe to use 
 ```
 
+Modeling. 
 ```{r}
 
+#Lasso approach
+set.seed(1)
+library(caret)
+library(glmnet)
+set.seed(1)
+d_rate_table=as.tibble(d_rate_table)
+#partition data into 50 percent. 
+index_50percent= createDataPartition(d_rate_table$Cumulative_cases,p=0.5,list=FALSE,times=1)
+
+#test and training.
+train=d_rate_table[index_50percent,]
+test=d_rate_table[-index_50percent,]
 
 
+#train=d_rate_table %>% sample_frac(0.8)
+#test=d_rate_table %>% setdiff(train)
+x_train=model.matrix(Cumulative_cases~.,train)[,-1]
+x_test=model.matrix(Cumulative_cases~.,test)[,-1]
+y_train=train %>% select(Cumulative_cases) %>% unlist() %>% as.numeric()
+y_test=test %>% select(Cumulative_cases) %>% unlist() %>% as.numeric()
 
 
+lasso_mod=glmnet(x_train,y_train,alpha=1)
+plot(lasso_mod)
+cv.train=cv.glmnet(x_train,y_train,alpha=1,type.measure = "mse")
+plot(cv.train)
+best_lam=cv.train$lambda.min
+best_lam 
 
+lasso_pred = predict(lasso_mod, s = best_lam, newx = x_test)
+mean((lasso_pred - y_test)^2)
+lasso_coef = predict(lasso_mod, type = "coefficients", s = best_lam)
+lasso_coef
 ```
 
 
