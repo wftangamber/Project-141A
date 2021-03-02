@@ -141,7 +141,7 @@ for (i in c(1:length(d_rate_table$`World.Share`))){
 
 
 d_rate_table=d_rate_table %>%
-  transmute(Cumulative_cases=Cumulative_cases,WHO_region=WHO_region,Population2020=`Population..2020.`,Pop_yearly_change=as.numeric(`Yearly.Change`),Net.Change=Net.Change,population_density=`Density..P.KmÂ².`,land_area=`Land.Area..KmÂ².`,Migrant_net_change=`Migrants..net.`,Fert_rate=as.numeric(`Fert..Rate`), median_age=as.numeric(`Med..Age`),urban_population_percent=as.numeric(`Urban.Pop..`),World_Share=as.numeric(`World.Share`),GDP_per_capita=as.numeric(`GDP per Capita $PPP 2019`),health_expenditure_of_GDP=as.numeric(`health expenditure in percent of GDP`))
+  transmute(infected_rate=(Cumulative_cases/`Population..2020.`),WHO_region=WHO_region,Population2020=`Population..2020.`,Pop_yearly_change=as.numeric(`Yearly.Change`),Net.Change=Net.Change,population_density=`Density..P.KmÂ².`,land_area=`Land.Area..KmÂ².`,Migrant_net_change=`Migrants..net.`,Fert_rate=as.numeric(`Fert..Rate`), median_age=as.numeric(`Med..Age`),urban_population_percent=as.numeric(`Urban.Pop..`),GDP_per_capita=as.numeric(`GDP per Capita $PPP 2019`),health_expenditure_of_GDP=as.numeric(`health expenditure in percent of GDP`))
 
 
 
@@ -163,7 +163,7 @@ library(glmnet)
 set.seed(1)
 d_rate_table=as.tibble(d_rate_table)
 #partition data into 50 percent. 
-index_80percent= createDataPartition(d_rate_table$Cumulative_cases,p=0.8,list=FALSE,times=1)
+index_80percent= createDataPartition(d_rate_table$infected_rate,p=0.8,list=FALSE,times=1)
 
 #test and training.
 train=d_rate_table[index_80percent,]
@@ -172,48 +172,60 @@ test=d_rate_table[-index_80percent,]
 
 #train=d_rate_table %>% sample_frac(0.8)
 #test=d_rate_table %>% setdiff(train)
-x_train=model.matrix(Cumulative_cases~.,train)[,-1]
-x_test=model.matrix(Cumulative_cases~.,test)[,-1]
-y_train=train %>% select(Cumulative_cases) %>% unlist() %>% as.numeric()
-y_test=test %>% select(Cumulative_cases) %>% unlist() %>% as.numeric()
+x_train=model.matrix(infected_rate~.,train)[,-1]
+x_test=model.matrix(infected_rate~.,test)[,-1]
+y_train=train %>% select(infected_rate) %>% unlist() %>% as.numeric()
+y_test=test %>% select(infected_rate) %>% unlist() %>% as.numeric()
 
 
 lasso_mod=glmnet(x_train,y_train,alpha=1 )
 plot(lasso_mod)
-cv.train=cv.glmnet(x_train,y_train,alpha=1,type.measure = "mse")
+cv.train=cv.glmnet(x_train,y_train,alpha=1,type.measure = "mse", standardize = TRUE, nfolds = 10)
 plot(cv.train)
 best_lam=cv.train$lambda.min
 best_lam 
 
 lasso_pred = predict(lasso_mod, s = best_lam, newx = x_test)
 mean((lasso_pred - y_test)^2)
+
+r2 <- cv.train$glmnet.fit$dev.ratio[which(cv.train$glmnet.fit$lambda == cv.train$lambda.1se)] 
+r2
+Rmse_lasso=sqrt(cv.train$cvm[cv.train$lambda == cv.train$lambda.1se])
+Rmse_lasso
 lasso_coef = predict(lasso_mod, type = "coefficients", s = best_lam)
 lasso_coef
-mean((lasso_pred - y_test)^2)
 
 
 
 
-
-```
-
-```{r}
-
-
+#ridge regression 
 
 ridge_mod=glmnet(x_train,y_train,alpha=0)
 plot(lasso_mod)
-cv.train=cv.glmnet(x_train,y_train,alpha=0,type.measure = "mse")
+cv.train=cv.glmnet(x_train,y_train,alpha=0,type.measure = "mse", standardize = TRUE, nfolds = 10)
+
+
+
+
 plot(cv.train)
 best_lam=cv.train$lambda.min
+
 best_lam 
 
 ridge_pred = predict(ridge_mod, s = best_lam, newx = x_test)
+
 mean((ridge_pred - y_test)^2)
-lasso_coef = predict(lasso_mod, type = "coefficients", s = best_lam)
-lasso_coef
+r2 <- cv.train$glmnet.fit$dev.ratio[which(cv.train$glmnet.fit$lambda == cv.train$lambda.1se)] 
+r2
+Rmse_ridge=sqrt(cv.train$cvm[cv.train$lambda == cv.train$lambda.1se])
+Rmse_ridge
+
+ridge_coef = predict(ridge_mod, type = "coefficients", s = best_lam)
+ridge_coef
 
 ```
+
+
 
 
 
