@@ -9,22 +9,13 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
----
-title: "STA 141 A project 2"
-author: "Jason Xie"
-date: "2021/2/13"
-output: html_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 Data_Analysis
 ```{r}
-library(ggplot2)
+
 library(tidyverse)
 library(readr)
+library(ggplot2)
 WHO <-  read.csv("https://covid19.who.int/WHO-COVID-19-global-data.csv")
 
 population <- read.csv('https://raw.githubusercontent.com/YixinXie10086/Project-141A/master/Main%20project/population_by_country_2020%20(1).csv') %>% filter_all(all_vars(!is.na(.)&(.!="N.A.")))
