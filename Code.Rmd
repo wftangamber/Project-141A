@@ -187,8 +187,8 @@ for (i in c(1:length(d_rate_table$`World.Share`))){
 ```{r}
 
 d_rate_table=d_rate_table %>%
-  transmute(infected_rate=(Cumulative_cases/`Population..2020.`),WHO_region=WHO_region,Population2020=`Population..2020.`,Pop_yearly_change=as.numeric(`Yearly.Change`),Net.Change=Net.Change,population_density=`Density..P.KmÂ².`,land_area=`Land.Area..KmÂ².`,Migrant_net_change=`Migrants..net.`,Fert_rate=as.numeric(`Fert..Rate`), median_age=as.numeric(`Med..Age`),urban_population_percent=as.numeric(`Urban.Pop..`),GDP_per_capita=as.numeric(`GDP per Capita $PPP 2019`),health_expenditure_of_GDP=as.numeric(`health expenditure in percent of GDP`),median_stringency=median_stringency
-)
+  mutate(infected_rate=(Cumulative_cases/`Population..2020.`),WHO_region=WHO_region,Population2020=`Population..2020.`,Pop_yearly_change=as.numeric(`Yearly.Change`),Net.Change=Net.Change,population_density=`Density..P.KmÂ².`,land_area=`Land.Area..KmÂ².`,Migrant_net_change=`Migrants..net.`,Fert_rate=as.numeric(`Fert..Rate`), median_age=as.numeric(`Med..Age`),urban_population_percent=as.numeric(`Urban.Pop..`),GDP_per_capita=as.numeric(`GDP per Capita $PPP 2019`),health_expenditure_of_GDP=as.numeric(`health expenditure in percent of GDP`),median_stringency=median_stringency
+) 
 
 
 
@@ -323,11 +323,12 @@ table_report
 ```
 Since linear lasso regression has the highest R square and the lowest R MSE, we use linear lasso
 
+Lasso Model Explanation:
 
 
 
 
-Testing: diagnostic....jusr sample, look for diagnostic plot for glmnet
+Testing: diagnostic....just 1 sample, look for diagnostic plot for glmnet
 ```{r}
 library(ggfortify)
 fit <- glmnet::cv.glmnet(x_train, y_train)
