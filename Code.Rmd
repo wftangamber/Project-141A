@@ -346,6 +346,34 @@ autoplot(lasso_mod)
 ```
 
 
+# Sensitivity Analysis 
+```{r message=FALSE, fig.align='center'}
+# Lasso Model Diagnostic
+library(plotmo)
+plotres(lasso_mod, which = 3) # residual vs. fitted
+```
+
+The above Residuals vs. Fitted plot shows a negative linear pattern on its left half while no patterns detected on its right half. Furthermore, there are 3 extreme values present. Therefore, it might be somehow problematic to assume linear relationship between explanatory variables and response variables.
+
+```{r}
+plotres(lasso_mod, which = 4) # QQ plot 
+```
+
+Since the right end is above the normal line, we have more extreme values than normal distribution for right end, which means that it has heavier tails. The confidence level that we constructed is actually smaller than the designed confidence level. Although the graph shows some level of heavier tails compare to Normal distribution, it is reasonable to assume the normality assumption holds because points locate relatively close to the normal line.
+
+```{r}
+# Ridge Model Diagnostic 
+plotres(ridge_mod, which = 3)
+```
+
+The above Residuals vs. Fitted plot shows a negative linear pattern on its left half while no patterns detected on its right half. Furthermore, there are 3 extreme values present. Therefore, it might be somehow problematic to assume linear relationship between explanatory variables and response variables.
+
+```{r}
+plotres(ridge_mod, which = 4)
+```
+
+Even though the right tail is above the normal line, most of the residuals approximately follow normal line. Thus, it it reasonable to assume that normality assumption holds.
+
 
 datasource:
 http://hdr.undp.org/en/indicators/194506#
