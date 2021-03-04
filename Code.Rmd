@@ -170,15 +170,18 @@ d_rate_table$`World.Share`=as.character(d_rate_table$`World.Share`)
 
 #remove the % sign and change features into numberic
 for (i in c(1:length(d_rate_table$`Yearly.Change`))){
+  d_rate_table$`Yearly.Change`[i]<- iconv(enc2utf8(d_rate_table$`Yearly.Change`[i]),sub="byte")
   d_rate_table$`Yearly.Change`[i]=substr(d_rate_table$`Yearly.Change`[i],1,nchar(d_rate_table$`Yearly.Change`[i])-1)
 }
 
 
 for (i in c(1:length(d_rate_table$`Urban.Pop..`))){
+  d_rate_table$`Urban.Pop..`[i]<- iconv(enc2utf8(d_rate_table$`Urban.Pop..`[i]),sub="byte")
   d_rate_table$`Urban.Pop..`[i]=substr(d_rate_table$`Urban.Pop..`[i],1,nchar(d_rate_table$`Urban.Pop..`[i])-1)
 }
 
 for (i in c(1:length(d_rate_table$`World.Share`))){
+  d_rate_table$`World.Share`[i]<- iconv(enc2utf8(d_rate_table$`World.Share`[i]),sub="byte")
   d_rate_table$`World.Share`[i]=substr(d_rate_table$`World.Share`[i],1,nchar(d_rate_table$`World.Share`[i])-1)
 }
 
