@@ -191,8 +191,9 @@ for (i in c(1:length(d_rate_table$`World.Share`))){
 
 
 ```{r}
+d_rate_table
 
-d_rate_table=d_rate_table %>%
+d_rate_table2=d_rate_table %>%
   summarize(infected_rate=(Cumulative_cases/`Population..2020.`),WHO_region=WHO_region,Population2020=`Population..2020.`,Pop_yearly_change=as.numeric(`Yearly.Change`),Net.Change=Net.Change,population_density=`Density..P.KmÂ².`,land_area=`Land.Area..KmÂ².`,Migrant_net_change=`Migrants..net.`,Fert_rate=as.numeric(`Fert..Rate`), median_age=as.numeric(`Med..Age`),urban_population_percent=as.numeric(`Urban.Pop..`),GDP_per_capita=as.numeric(`GDP per Capita $PPP 2019`),health_expenditure_of_GDP=as.numeric(`health expenditure in percent of GDP`),median_stringency=median_stringency
 ) 
 
@@ -201,8 +202,8 @@ d_rate_table=d_rate_table %>%
   
                                      
 
-d_rate_table
-dim(d_rate_table)
+d_rate_table2
+dim(d_rate_table2)
 #d_rate_table is the dataframe to use 
 ```
 
@@ -214,13 +215,13 @@ set.seed(1)
 library(caret)
 library(glmnet)
 set.seed(1)
-d_rate_table=as.tibble(d_rate_table)
+d_rate_table=as.tibble(d_rate_table2)
 #partition data into 50 percent. 
-index_80percent= createDataPartition(d_rate_table$infected_rate,p=0.8,list=FALSE,times=1)
+index_80percent= createDataPartition(d_rate_table2$infected_rate,p=0.8,list=FALSE,times=1)
 
 #test and training.
-train=d_rate_table[index_80percent,]
-test=d_rate_table[-index_80percent,]
+train=d_rate_table2[index_80percent,]
+test=d_rate_table2[-index_80percent,]
 
 
 #train=d_rate_table %>% sample_frac(0.8)
