@@ -126,12 +126,15 @@ health_expenditure <- read.csv("https://raw.githubusercontent.com/YixinXie10086/
 colnames(health_expenditure)[2]="health expenditure in percent of GDP"
 
 for (i in c(1:length(health_expenditure$Country))){
+  health_expenditure$Country[i]<- iconv(enc2utf8(health_expenditure$Country[i]),sub="byte")
   health_expenditure$Country[i]=substr(health_expenditure$Country[i],2,nchar(health_expenditure$Country[i]))
+  
 }
 
 
 
 health_expenditure=as.tibble(health_expenditure)
+
 
 
 ```
